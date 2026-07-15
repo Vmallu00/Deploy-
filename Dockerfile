@@ -22,6 +22,10 @@ RUN apt-get update && apt-get install -y \
     containerd.io \
     && rm -rf /var/lib/apt/lists/*
 
+# Create daemon.json with VFS driver and disable networking
+RUN mkdir -p /etc/docker && \
+    echo '{"storage-driver": "vfs", "iptables": false, "bridge": "none"}' > /etc/docker/daemon.json
+
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
