@@ -1,9 +1,8 @@
-{
-  "build": {
-    "builder": "DOCKERFILE"
-  },
-  "deploy": {
-    "startCommand": "/home/railway/entrypoint.sh",
-    "restartPolicyType": "ON_FAILURE"
-  }
-}
+#!/bin/bash
+set -e
+
+echo "Ubuntu 22.04 VM with Podman (Docker-compatible) is ready!"
+echo "Container is alive. Connect via SSH or Console."
+
+# Keeps the process running forever – without this, the container exits
+exec sleep infinity
