@@ -2,34 +2,28 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install base dependencies (iptables, uidmap, etc.)
+# Install Podman and its dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     sudo \
-    iptables \
-    uidmap \
-    dbus-user-session \
     git \
     vim-tiny \
     htop \
+    podman \
+    podman-docker  # This creates /usr/bin/docker symlink to podman \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non‑root user (required for rootless Docker)
+# Create a non‑root user (best practice)
 RUN useradd -m -s /bin/bash railway && \
     echo "railway ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 USER railway
 WORKDIR /home/railway
 
-# Install rootless Docker, skipping the iptables kernel module check
-RUN curl -fsSL https://get.docker.com/rootless -o install-rootless.sh && \
-    SKIP_IPTABLES=1 sh install-rootless.sh
+# (Optional) Set environment variable to make podman use rootless mode
+ENV PATH=/usr/bin:$PATH
 
-# Set Docker environment variables
-ENV DOCKER_HOST=unix:///run/user/1000/docker.sock
-ENV PATH=/home/railway/bin:$PATH
-
-# Copy entrypoint
+# Copy a simple entrypoint that just runs a shell
 COPY --chown=railway:railway entrypoint.sh /home/railway/entrypoint.sh
 RUN chmod +x /home/railway/entrypoint.sh
 
