@@ -2,6 +2,7 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Install Podman + Docker alias
 RUN apt-get update && apt-get install -y \
     curl \
     sudo \
@@ -12,12 +13,10 @@ RUN apt-get update && apt-get install -y \
     podman-docker \
     && rm -rf /var/lib/apt/lists/*
 
-RUN useradd -m -s /bin/bash railway && \
-    echo "railway ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
-USER railway
-WORKDIR /home/railway
+# Optionally set storage driver to vfs (more compatible)
+ENV CONTAINER_STORAGE_DRIVER=vfs
 
 EXPOSE 8080
 
+# Keep the container alive – run as root (default)
 CMD ["sleep", "infinity"]
