@@ -2,7 +2,7 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install base dependencies
+# Install base dependencies (iptables, uidmap, etc.)
 RUN apt-get update && apt-get install -y \
     curl \
     sudo \
@@ -14,22 +14,22 @@ RUN apt-get update && apt-get install -y \
     htop \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user (required for rootless Docker)
+# Create non‑root user (required for rootless Docker)
 RUN useradd -m -s /bin/bash railway && \
     echo "railway ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 USER railway
 WORKDIR /home/railway
 
-# Install rootless Docker (installs into ~/bin, no system packages needed)
+# Install rootless Docker, skipping the iptables kernel module check
 RUN curl -fsSL https://get.docker.com/rootless -o install-rootless.sh && \
-    sh install-rootless.sh
+    SKIP_IPTABLES=1 sh install-rootless.sh
 
 # Set Docker environment variables
 ENV DOCKER_HOST=unix:///run/user/1000/docker.sock
 ENV PATH=/home/railway/bin:$PATH
 
-# Copy and set up entrypoint
+# Copy entrypoint
 COPY --chown=railway:railway entrypoint.sh /home/railway/entrypoint.sh
 RUN chmod +x /home/railway/entrypoint.sh
 
